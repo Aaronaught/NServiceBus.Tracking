@@ -34,6 +34,15 @@ namespace NServiceBus.Tracking.Mongo
         }
 
         /// <inheritdoc />
+        public void CompleteAfter(params string[] messageTypeNames)
+        {
+            collection.Update(
+                Query<OperationData>.EQ(x => x.Id, id),
+                Update<OperationData>.Set(x => x.CompletionMessageTypes, messageTypeNames)
+            );
+        }
+
+        /// <inheritdoc />
         public IEnumerable<OperationStage> GetHistory()
         {
             var operation = collection.FindOneById(id);
@@ -41,6 +50,18 @@ namespace NServiceBus.Tracking.Mongo
                 return Enumerable.Empty<OperationStage>();
             return (operation.Stages ?? Enumerable.Empty<OperationStageData>())
                 .Select(data => new OperationStage(data.ReceivedMessageType, data.WhenReceived));
+        }
+
+        /// <inheritdoc />
+        public bool IsCompleted()
+        {
+            var operation = collection.FindOneById(id);
+            if (operation == null)
+                return false;
+            var completionMessageTypes = operation.CompletionMessageTypes ?? Enumerable.Empty<string>();
+            var receivedMessageTypes = (operation.Stages ?? Enumerable.Empty<OperationStageData>())
+                .Select(data => data.ReceivedMessageType);
+            return !completionMessageTypes.Except(receivedMessageTypes).Any();
         }
 
         /// <inheritdoc />

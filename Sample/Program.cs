@@ -42,10 +42,11 @@ namespace NServiceBus.Tracking.Sample
                 Console.WriteLine();
                 bus.SendLocal(new OrderCommand { Description = "My order" });
                 var operation = Operation.Current;
+                operation.CompleteAfter<BillCommand, ShipCommand>();
                 Console.Out.WriteLine(ConsoleColor.Green, "Operation ID is {0}", operation.Id);
                 Console.Out.WriteLine(ConsoleColor.Green, "Waiting for operation to complete...");
                 int waitCount = 0;
-                while (!operation.WasMessageReceived("NServiceBus.Tracking.Sample.Messages.ShipCommand"))
+                while (!operation.IsCompleted())
                 {
                     Thread.Sleep(500);
                     Console.Out.WriteLine(ConsoleColor.Gray, "Still waiting - polled {0} times", ++waitCount);

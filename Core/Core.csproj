@@ -49,6 +49,7 @@
     <Compile Include="IOperation.cs" />
     <Compile Include="IOperationProvider.cs" />
     <Compile Include="Operation.cs" />
+    <Compile Include="OperationExtensions.cs" />
     <Compile Include="OperationMutator.cs" />
     <Compile Include="OperationStage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

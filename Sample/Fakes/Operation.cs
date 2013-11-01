@@ -9,6 +9,7 @@ namespace NServiceBus.Tracking.Sample.Fakes
         private readonly string id;
         private readonly string originatingMessageType;
         private readonly DateTime whenStarted;
+        private readonly List<string> completionMessageTypes = new List<string>();
         private readonly List<OperationStage> stages = new List<OperationStage>();
 
         public Operation(string id, string originatingMessageType, DateTime whenStarted)
@@ -18,9 +19,22 @@ namespace NServiceBus.Tracking.Sample.Fakes
             this.whenStarted = whenStarted;
         }
 
+        public void CompleteAfter(params string[] messageTypeNames)
+        {
+            completionMessageTypes.Clear();
+            completionMessageTypes.AddRange(messageTypeNames);
+        }
+
         public IEnumerable<OperationStage> GetHistory()
         {
             return stages;
+        }
+
+        public bool IsCompleted()
+        {
+            var receivedMessageTypes = (stages ?? Enumerable.Empty<OperationStage>())
+                .Select(s => s.ReceivedMessageType);
+            return !completionMessageTypes.Except(receivedMessageTypes).Any();
         }
 
         public void Push(OperationStage nextStage)

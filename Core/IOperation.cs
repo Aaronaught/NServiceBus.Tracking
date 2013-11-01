@@ -9,9 +9,24 @@ namespace NServiceBus.Tracking
     public interface IOperation
     {
         /// <summary>
+        /// Indicates that the operation should be considered complete after all of a set of
+        /// messages are retrieved.
+        /// </summary>
+        /// <param name="messageTypeNames">An array containing the names of message types which
+        /// must all be received in order for the operation to complete.</param>
+        void CompleteAfter(params string[] messageTypeNames);
+
+        /// <summary>
         /// Gets a sequence of all of the stages which have executed or are currently executing.
         /// </summary>
         IEnumerable<OperationStage> GetHistory();
+
+        /// <summary>
+        /// Checks whether or not the operation has finished (all required messages received).
+        /// </summary>
+        /// <returns><c>true</c> if the operation completed; <c>false</c> if it failed or is still
+        /// running.</returns>
+        bool IsCompleted();
 
         /// <summary>
         /// Pushes a new item at the end of the operation history.

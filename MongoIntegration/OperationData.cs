@@ -14,6 +14,7 @@ namespace NServiceBus.Tracking.Mongo
         /// </summary>
         public OperationData()
         {
+            CompletionMessageTypes = new List<string>();
             Stages = new List<OperationStageData>();
         }
 
@@ -25,6 +26,12 @@ namespace NServiceBus.Tracking.Mongo
 
         /// <inheritdoc cref="IOperation.WhenStarted" />
         public DateTime WhenStarted { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of message types which must be received in order for the
+        /// operation to complete.
+        /// </summary>
+        public IList<string> CompletionMessageTypes { get; set; }
 
         /// <summary>
         /// Gets or sets the list of stages for the current operation.
