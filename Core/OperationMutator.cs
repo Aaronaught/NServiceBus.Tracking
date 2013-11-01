@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using log4net;
 using NServiceBus.MessageMutator;
 using NServiceBus.Unicast.Transport;
+using NServiceBus.UnitOfWork;
 
 namespace NServiceBus.Tracking
 {
     /// <summary>
     /// Embeds and propagates operation information in incoming and outgoing messages.
     /// </summary>
-    public class OperationMutator : IMutateOutgoingTransportMessages, IMessageModule
+    public class OperationMutator : IMutateOutgoingTransportMessages, IManageUnitsOfWork
     {
         /// <summary>
         /// The name of the message header that contains the Operation ID.
@@ -38,13 +39,18 @@ namespace NServiceBus.Tracking
         }
 
         /// <inheritdoc />
-        public void HandleBeginMessage()
+        public void Begin()
         {
         }
 
         /// <inheritdoc />
-        public void HandleEndMessage()
+        public void End(Exception ex = null)
         {
+            if (ex != null)
+            {
+                log.Debug("Exception occurred - skipping operation auditing");
+                return;
+            }
             log.Debug("Processing incoming message");
             var now = DateTime.Now;
             var operationId = GetCurrentOperationId();
@@ -68,11 +74,6 @@ namespace NServiceBus.Tracking
                     typeName);
                 operation.Push(stage);
             }
-        }
-
-        /// <inheritdoc />
-        public void HandleError()
-        {
         }
 
         /// <inheritdoc />
